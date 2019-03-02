@@ -8,10 +8,11 @@ logging.basicConfig(filename='logs/task.log', level=logging.DEBUG, format='%(asc
 log = logging.getLogger(__name__)
 
 
-class Task():
+class Task:
     """Task (environment) that defines the goal and provides feedback to the agent."""
-    def __init__(self, init_pose=None, init_velocities=None, 
-        init_angle_velocities=None, runtime=5., target_pos=None):
+    def __init__(
+            self, init_pose=None, init_velocities=None,
+            init_angle_velocities=None, runtime=5., target_pos=None):
         """Initialize a Task object.
         Params
         ======
@@ -35,6 +36,10 @@ class Task():
 
     def get_reward(self):
         """Uses current pose of sim to return reward."""
+        reward = 1. - .3 * (abs(self.sim.pose[:3] - self.target_pos)).sum()
+        partial = .3 * (abs(self.sim.pose[:3] - self.target_pos)).sum()
+        log.debug(
+            f"[reward {reward}] = 1.0-0.3*{partial}] [sim.pose[:3] {self.sim.pose[:3]}] [target_pos {self.target_pos}]")
         reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
         return reward
 
@@ -43,7 +48,7 @@ class Task():
         reward = 0
         pose_all = []
         for _ in range(self.action_repeat):
-            done = self.sim.next_timestep(rotor_speeds) # update the sim pose and velocities
+            done = self.sim.next_timestep(rotor_speeds)  # update the sim pose and velocities
             reward += self.get_reward() 
             pose_all.append(self.sim.pose)
         next_state = np.concatenate(pose_all)
