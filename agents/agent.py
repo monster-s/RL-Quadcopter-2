@@ -132,7 +132,7 @@ class Critic:
             outputs=action_gradients)
 
 
-class DDPG:
+class DDPGAgent:
     """Reinforcement Learning agent that learns using DDPG."""
     def __init__(self, task):
         self.task = task
@@ -253,9 +253,11 @@ class ReplayBuffer:
         e = self.experience(state, action, reward, next_state, done)
         self.memory.append(e)
 
-    def sample(self, batch_size=64):
+    def sample(self, **kwargs):
         """Randomly sample a batch of experiences from memory."""
-        return random.sample(self.memory, k=self.batch_size)
+        # fixed unused 'batch_size' arg.  Use self.batch_size unless overridden in kwargs
+        batch_size = kwargs.pop('batch_size', self.batch_size)
+        return random.sample(self.memory, k=batch_size)
 
     def __len__(self):
         """Return the current size of internal memory."""
