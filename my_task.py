@@ -37,7 +37,7 @@ class MyTask:
     def get_reward(self):
         """Uses current pose of sim to return reward."""
         dist_partial = ((self.sim.pose[:3] - self.target_pos)**2).sum()
-        reward = 1. - .3 * dist_partial
+        reward = max(-100, - .3 * dist_partial)
         log.debug(
             f"[reward {reward}] = [dist_partial {dist_partial}] "
             f"[sim.pose[:3] {self.sim.pose[:3]}] [target_pos {self.target_pos}]")
