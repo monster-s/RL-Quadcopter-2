@@ -26,6 +26,8 @@ class Actor:
         self.action_range = self.action_high - self.action_low
 
         # Initialize any other variables here
+        self.model = None
+        self.train_fn = None
 
         self.build_model()
 
@@ -42,11 +44,13 @@ class Actor:
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
 
         # Add final output layer with sigmoid activation
-        raw_actions = layers.Dense(units=self.action_size, activation='sigmoid',
+        raw_actions = layers.Dense(
+            units=self.action_size, activation='sigmoid',
             name='raw_actions')(net)
 
         # Scale [0, 1] output for each action dimension to proper range
-        actions = layers.Lambda(lambda x: (x * self.action_range) + self.action_low,
+        actions = layers.Lambda(
+            lambda x: (x * self.action_range) + self.action_low,
             name='actions')(raw_actions)
 
         # Create Keras model
@@ -82,6 +86,8 @@ class Critic:
         self.action_size = action_size
 
         # Initialize any other variables here
+        self.model = None
+        self.get_action_gradients = None
 
         self.build_model()
 
@@ -107,7 +113,7 @@ class Critic:
 
         # Add more layers to the combined network if needed
 
-        # Add final output layer to prduce action values (Q values)
+        # Add final output layer to produce action values (Q values)
         Q_values = layers.Dense(units=1, name='q_values')(net)
 
         # Create Keras model
@@ -162,6 +168,9 @@ class DDPG:
         self.gamma = 0.99  # discount factor
         self.tau = 0.01  # for soft update of target parameters
 
+        # pep8?
+        self.last_state = None
+
     def reset_episode(self):
         self.noise.reset()
         state = self.task.reset()
@@ -169,7 +178,7 @@ class DDPG:
         return state
 
     def step(self, action, reward, next_state, done):
-         # Save experience / reward
+        # Save experience / reward
         self.memory.add(self.last_state, action, reward, next_state, done)
 
         # Learn, if enough samples are available in memory
@@ -190,7 +199,8 @@ class DDPG:
         """Update policy and value parameters using given batch of experience tuples."""
         # Convert experience tuples to separate arrays for each element (states, actions, rewards, etc.)
         states = np.vstack([e.state for e in experiences if e is not None])
-        actions = np.array([e.action for e in experiences if e is not None]).astype(np.float32).reshape(-1, self.action_size)
+        actions = np.array(
+            [e.action for e in experiences if e is not None]).astype(np.float32).reshape(-1, self.action_size)
         rewards = np.array([e.reward for e in experiences if e is not None]).astype(np.float32).reshape(-1, 1)
         dones = np.array([e.done for e in experiences if e is not None]).astype(np.uint8).reshape(-1, 1)
         next_states = np.vstack([e.next_state for e in experiences if e is not None])
@@ -205,7 +215,8 @@ class DDPG:
         self.critic_local.model.train_on_batch(x=[states, actions], y=Q_targets)
 
         # Train actor model (local)
-        action_gradients = np.reshape(self.critic_local.get_action_gradients([states, actions, 0]), (-1, self.action_size))
+        action_gradients = np.reshape(
+            self.critic_local.get_action_gradients([states, actions, 0]), (-1, self.action_size))
         self.actor_local.train_fn([states, action_gradients, 1])  # custom training function
 
         # Soft-update target models
@@ -259,6 +270,10 @@ class OUNoise:
         self.mu = mu * np.ones(size)
         self.theta = theta
         self.sigma = sigma
+
+        # pep8
+        self.state = None
+
         self.reset()
 
     def reset(self):
