@@ -1,5 +1,12 @@
+import logging
+
 import numpy as np
+
 from physics_sim import PhysicsSim
+
+logging.basicConfig(filename='logs/task.log', level=logging.DEBUG, format='%(asctime)s - %(name)s - %(message)s')
+log = logging.getLogger(__name__)
+
 
 class Task():
     """Task (environment) that defines the goal and provides feedback to the agent."""
