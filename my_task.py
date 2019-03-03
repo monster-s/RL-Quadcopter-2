@@ -23,6 +23,7 @@ class MyTask:
             target_pos: target/goal (x,y,z) position for the agent
         """
         # Simulation
+        log.debug(f"init_pose: {init_pose}, target_pos: {target_pos}")
         self.sim = PhysicsSim(init_pose, init_velocities, init_angle_velocities, runtime) 
         self.action_repeat = 3
 
@@ -36,8 +37,9 @@ class MyTask:
 
     def get_reward(self):
         """Uses current pose of sim to return reward."""
-        dist_partial = ((self.sim.pose[:3] - self.target_pos)**2).sum()
-        reward = max(-100, - .3 * dist_partial)
+        # log.debug(f"sim.pose: {self.sim.pose}")
+        dist_partial = (abs(self.sim.pose[:3] - self.target_pos)).sum()
+        reward = 1.0 + max(-50, - .3 * dist_partial)
         log.debug(
             f"[reward {reward}] = [dist_partial {dist_partial}] "
             f"[sim.pose[:3] {self.sim.pose[:3]}] [target_pos {self.target_pos}]")
